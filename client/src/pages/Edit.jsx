@@ -14,11 +14,10 @@ function Edit() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("fetching data")
         const res = await axios.get(`http://localhost:8800/api/cards/${id}`)
-        const newCards = res.data.map(function(card, index) {
-          return({key: uuidv4(), front: card.front, back: card.back})
-        }) 
+
+        const newCards = JSON.parse(res.data[0].flashcards)
+        
         setCards(newCards)
       }
       catch(err) {
