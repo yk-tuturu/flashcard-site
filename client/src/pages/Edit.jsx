@@ -82,6 +82,15 @@ function Edit() {
     setCards(newCards)
   }
 
+  const saveFlashSet = async(e) => {
+    e.preventDefault()
+    try{
+        await axios.post(`http://localhost:8800/api/cards/update/${id}`, cards)
+    }catch(err){
+        console.log(err)
+    }
+};
+
   const functions = {
     updateCardInfo: updateCardInfo,
     addCard: addCard,
@@ -110,7 +119,7 @@ function Edit() {
       <div className="edit-info edit-cards">
         <div className="edit-heading">
           Edit Flashcard Deck
-          <button className= "saveButton">Save</button>
+          <button className= "saveButton" onClick={saveFlashSet}>Save</button>
         </div>
         <div className="card-container">
           {cards.map(function(card, index) {
