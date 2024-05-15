@@ -9,16 +9,28 @@ function CardPair(props) {
 
     const handleFrontChange = (e) => {
         setFrontValue(prev => e)
-        props.updateCardInfo({index: props.index, frontValue: e, backValue: backValue})
+        props.functions.updateCardInfo({index: props.index, frontValue: e, backValue: backValue})
     }
 
     const handleBackChange = (e) => {
         setBackValue(prev => e)
-        props.updateCardInfo({index: props.index, frontValue: frontValue, backValue: e})
+        props.functions.updateCardInfo({index: props.index, frontValue: frontValue, backValue: e})
     }
 
     const handleAddCard = () => {
-        props.addCard(props.index)
+        props.functions.addCard(props.index)
+    }
+
+    const handleDeleteCard = () => {
+        props.functions.deleteCard(props.index)
+    }
+
+    const handleMoveUp = () => {
+        props.functions.moveUp(props.index)
+    }
+
+    const handleMoveDown = () => {
+        props.functions.moveDown(props.index)
     }
 
     return (
@@ -26,7 +38,12 @@ function CardPair(props) {
             <div></div>
             <ReactQuill theme="snow" value={frontValue} onChange={handleFrontChange}/>
             <ReactQuill theme="snow" value={backValue} onChange={handleBackChange}/>
-            <button onClick={handleAddCard}>Add</button>
+            <div className="buttonContainer">
+                <button onClick={handleAddCard}>Add</button>
+                <button onClick={handleDeleteCard}>Delete</button>
+                <button onClick={handleMoveUp}>Up</button>
+                <button onClick={handleMoveDown}>Down</button>
+            </div>
         </div>
         
     )
