@@ -2,25 +2,25 @@ import React from "react"
 import {Link} from "react-router-dom"
 import { useNavigate } from "react-router-dom"
 
-function HomeListItem(props) {
+function HomeListItem({info}) {
     const navigate = useNavigate()
 
     function handleClick() {
-        navigate(`/edit/${props.deckID}`)
+        navigate(`/edit/${info.id}`)
     }
     return (
         
         <div className="home-list-item" onClick={handleClick}>
             <div className="home-list-left">
-                <h2>Interview</h2>
+                <h2>{info.name}</h2>
                 <p className="author">Author: Tuturu</p>
-                <p>Subject: CS</p>
-                <p>Views: 69  Bookmark: 1</p>
+                <p>Subject: {info.subject}</p>
+                <span style={{marginRight: "16px"}}>Likes: {info.likes} </span> <span>Bookmark: {info.bookmarks}</span>
                 </div>
                 <div className="home-list-right">
             <div className="flash-logo-container">
                 <div><img src="flashcard_logo.png" alt="flashcard"></img></div>
-                <div> <h1>:19</h1></div>
+                <div> <h1>:{info.length}</h1></div>
             </div>
             <p>Tags: test, 1, 2, 3</p>
             </div>
