@@ -35,14 +35,14 @@ function CardPair(props) {
 
     return (
         <div className="cardPair">
-            <div></div>
+            <div>{props.index + 1}.</div>
             <ReactQuill theme="snow" value={frontValue} onChange={handleFrontChange}/>
             <ReactQuill theme="snow" value={backValue} onChange={handleBackChange}/>
             <div className="buttonContainer">
-                <button onClick={handleAddCard}><img src="add.png" alt="add"></img></button>
-                <button onClick={handleDeleteCard}><img src="trash.png" alt="delete"></img></button>
-                <button onClick={handleMoveUp}><img src="up.png" alt="move up"></img></button>
-                <button onClick={handleMoveDown}><img src="down.png" alt="move down"></img></button>
+                <button onClick={handleAddCard}><img src="/add.png" alt="add"></img></button>
+                <button onClick={handleDeleteCard}><img src="/trash.png" alt="delete"></img></button>
+                <button onClick={handleMoveUp}><img src="/up.png" alt="move up"></img></button>
+                <button onClick={handleMoveDown}><img src="/down.png" alt="move down"></img></button>
             </div>
         </div>
         

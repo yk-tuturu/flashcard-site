@@ -26,15 +26,6 @@
   .home-list {
     justify-content: center;
     margin-top: 70px;
-    overflow: scroll
-  }
-  
-  .home-list ul {
-    list-style-type: none;
-  }
-  
-  .home-list li {
-    width: 100%
   }
   
   .home-list-item {
@@ -52,9 +43,14 @@
     width: 90%;
     transition: transform 0.3s;
   }
+
+  a {
+    text-decoration: none;
+  }
   
   .home-list-item p {
-    margin: 5px 0px
+    margin: 5px 0px;
+    text-decoration: none;
   }
   
   .home-list-item h1 {
@@ -62,7 +58,8 @@
   }
 
   .home-list-item h2 {
-    margin-bottom: 0px
+    margin-bottom: 0px;
+    text-decoration: none;
   }
 
   .home-list-right {
@@ -70,7 +67,7 @@
   }
   
   .home-list-left {
-    text-align: left
+    text-align: left;
   }
   
   .home-list-item:hover {

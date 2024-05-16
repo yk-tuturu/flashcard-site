@@ -3,12 +3,14 @@ import axios from "axios"
 import { v4 as uuidv4 } from 'uuid';
 import CardPair from "./CardPair.jsx"
 import '../styles/Cards.css'
+import { useLocation } from 'react-router-dom';
 
 
 function Edit() {
   const [cards, setCards] = useState([]);
 
-  const id = 1
+  const location = useLocation()
+  const id = location.pathname.split("/")[2]
 
   // grabs existing flashset info, we hardcoded the id for now, will change later
   useEffect(() => {
