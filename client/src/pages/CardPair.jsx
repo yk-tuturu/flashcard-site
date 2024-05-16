@@ -39,10 +39,10 @@ function CardPair(props) {
             <ReactQuill theme="snow" value={frontValue} onChange={handleFrontChange}/>
             <ReactQuill theme="snow" value={backValue} onChange={handleBackChange}/>
             <div className="buttonContainer">
-                <button onClick={handleAddCard}>Add</button>
-                <button onClick={handleDeleteCard}>Delete</button>
-                <button onClick={handleMoveUp}>Up</button>
-                <button onClick={handleMoveDown}>Down</button>
+                <button onClick={handleAddCard}><img src="add.png" alt="add"></img></button>
+                <button onClick={handleDeleteCard}><img src="trash.png" alt="delete"></img></button>
+                <button onClick={handleMoveUp}><img src="up.png" alt="move up"></img></button>
+                <button onClick={handleMoveDown}><img src="down.png" alt="move down"></img></button>
             </div>
         </div>
         

@@ -60,18 +60,28 @@
     margin: 8px
 }
 
+.quill {
+    display: flex;
+    flex-direction: column-reverse; 
+}
+
 .quill > .ql-toolbar {
     /* border radius of the toolbar */
-    border-radius: 10px 10px 0 0;
+    border-radius: 0px 0px 10px 10px;
     padding: 8px;
     align-items: center;
     justify-content: center;
-    opacity: 0
+    opacity: 0;
+    background-color: rgb(225, 225, 225);
   }
+
 .ql-container {
     /* border radius of the container and for font size*/
-    height: 150px;
-    border-top: 1px solid #ccc
+    height: 200px;
+    border-top: 1px solid #ccc !important;
+    font-size: 18px;
+    background-color: white;
+    padding: 8px
   }
 
 .quill > .ql-formats button {
@@ -83,10 +93,6 @@
 .quill:focus-within .ql-toolbar {
     opacity: 1                         
 }
-
-div.blurred-editor div.ql-toolbar {
-    display: none
-}
     
 .card {
     margin: 16px
@@ -94,14 +100,31 @@ div.blurred-editor div.ql-toolbar {
 
 .cardPair {
     display: grid;
-    grid-template-columns: 0.05fr 1fr 1fr 0.05fr;
+    grid-template-columns: 0.05fr 1fr 1fr 0.1fr;
     column-gap: 16px;
     border-style: 1px solid black;
     padding: 10px 10px
 }
 
-.card-container {
-    display: block
+.cardPair:focus-within {
+    background-color: #f2f2f2;
+}
+
+.buttonContainer {
+    display: none
+}
+
+.buttonContainer img {
+    width: 20px;
+    height: 20px;
+}
+
+.buttonContainer button {
+    margin: 5px; 
+}
+
+.cardPair:focus-within .buttonContainer{
+    display: block;
 }
 
 .saveButton {
