@@ -131,3 +131,9 @@
     float: right;
     height: 30px;
 }
+
+.createButton {
+    width: 40%;
+    height: 30px;
+    margin: auto;
+}

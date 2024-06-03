@@ -1,4 +1,5 @@
 import {db} from "../db.js"
+import { v4 as uuidv4 } from 'uuid';
 
 export const getFlashSet = (req, res) => {
     const q = "SELECT * from flashsets WHERE id = ?"
@@ -32,13 +33,16 @@ export const getSets = (req, res) => {
 export const updateFlashSet = (req, res) => {
     console.log("reached update card route")
 
-    const newCards = req.body
+    const newCards = req.body.cards
 
     const str = JSON.stringify(newCards)
     console.log(str)
     
-    const q = "UPDATE flashsets SET flashcards = ?, length=? WHERE id=?"
+    const q = "UPDATE flashsets SET name=?, subject=?, description=?, flashcards = ?, length=? WHERE id=?"
     const values = [
+        req.body.name,
+        req.body.subject,
+        req.body.description,
         str,
         newCards.length, 
         req.params.id
@@ -48,6 +52,35 @@ export const updateFlashSet = (req, res) => {
 
         return res.status(200).json("update success")
     })
+}
 
-    
+export const createFlashSet = (req, res) => {
+    if (!req.body.name) {
+        return res.status(404).json("Title must not be null")
+    }
+
+    if (!req.body.subject) {
+        return res.status(404).json("Subject must not be null")
+    }
+
+    const emptyCard = [{
+        key: uuidv4(),
+        front: "",
+        back: ""
+    }]
+
+    const q = "INSERT INTO flashsets(`name`, `user_id`, `flashcards`, `subject`, `description`) VALUES (?)"
+    const values = [
+        req.body.name,
+        req.body.user_id,
+        JSON.stringify(emptyCard),
+        req.body.subject,
+        req.body.description
+    ]
+
+    db.query(q, [values], (err, data) => {
+        if (err) return res.json(err);
+        console.log(data)
+        return res.status(200).json({id: data.insertId})
+    })
 }
