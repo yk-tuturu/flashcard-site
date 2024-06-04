@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import axios from "axios"
 import { v4 as uuidv4 } from 'uuid';
 import CardPair from "./CardPair.jsx"
@@ -6,30 +6,56 @@ import '../styles/Cards.css'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from "../context/authContext";
 
-
 function Edit() {
+  // to make sure we have perms to edit this
   const {currentUser, login} = useContext(AuthContext)
+
+  // navigation
   const navigate = useNavigate()
 
+  // stores all flashcard info, the cards are like an array within the object
   const [info, setInfo] = useState({
     name: "",
     subject: "",
     description: "",
     cards: [],
   });
+  const [appended, setAppended] = useState(false)
 
+  const cardsRef = useRef(null);
+
+  function getMap() {
+    if (!cardsRef.current) {
+      cardsRef.current = new Map();
+    }
+    return cardsRef.current
+  }
+
+  // useEffect(() => {
+  //   if (focusedElement) {
+  //     focusedElement.value && console.log(focusedElement);
+  //   }
+  //  console.log(focusedElement.parentElement.parentElement);
+  // }, [focusedElement])
+
+
+  // to know which flashset we are supposed to fetch, we read the url
   const location = useLocation()
   const id = location.pathname.split("/")[2]
 
+  // fetches flashset
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.get(`http://localhost:8800/api/cards/${id}`)
-
+        
+        // if you're not the author, kicks you back to homepage
+        // yeah prolly not the best way to implement this, can change this later
         if (res.data[0].user_id !== currentUser.id) {
           navigate("/")
         }
-
+        
+        // parses flashcard content, which was originally stored as a JSON string in the database
         const newCards = JSON.parse(res.data[0].flashcards)
         console.log(newCards)
         
@@ -47,6 +73,63 @@ function Edit() {
     fetchData()
   }, [id])
 
+  // tabbing shenanigans
+  useEffect(() => {
+    const TabFunction = (event) => {
+      if (event.key === "Tab") {
+        const map = getMap()
+
+        // loops through map to find the active element (yeah not the most efficient but oh well)
+        for (let [card, node] of map) {
+          if (node.contains(document.activeElement)) {
+            // figures out whether we front or back
+            const front = node.querySelector(".front")
+            const back = node.querySelector(".back")
+            
+            // if in front, we just select the back, cool enough
+            if (front.contains(document.activeElement)) {
+              back.querySelector(".ql-editor").focus()
+            }
+            
+            // if on the back, try to get the next card
+            else if (back.contains(document.activeElement)) {
+              const currentIndex = info.cards.indexOf(card) 
+
+              // if we are at the end, add a new card, and set the appended flag to true. 
+              // the appended flag will trigger the moving of focus later on
+              if (currentIndex + 1 >= info.cards.length) {
+                addCard(currentIndex)
+                setAppended(true)
+                return
+              }
+              
+              // else, just get the next card
+              const nextNode = map.get(info.cards[currentIndex + 1])
+              nextNode.querySelector(".front").querySelector(".ql-editor").focus()
+            }
+            break;
+          }
+        }
+      }
+    }
+    document.addEventListener("keydown", TabFunction, false);
+
+    return () => {
+      document.removeEventListener("keydown", TabFunction, false);
+    };
+  }, [info]);
+
+  // the appended flag wil trigger this part here, where after the rendering of the new card, we will focus the new card
+  useEffect(() => {
+    if (appended) {
+      const map = getMap();
+      const nextNode = map.get(info.cards[info.cards.length - 1])
+      nextNode.querySelector(".front").querySelector(".ql-editor").focus()
+      setAppended(false)
+    }
+  }, [appended, info]);
+
+  
   // a bunch of functions for adding and deleting and moving cards
   function updateCardInfo(data) {
     const newCards = info.cards.map(function(card, index) {
@@ -58,8 +141,7 @@ function Edit() {
       }
     })
     setInfo({...info, cards: newCards})
-    console.log(info)
-  }
+}
 
   function addCard(index) {
     const newCards = [
@@ -99,6 +181,7 @@ function Edit() {
     setInfo({...info, cards: newCards})
   }
 
+  // saves flashset changes
   const saveFlashSet = async(e) => {
     e.preventDefault()
     try{
@@ -106,18 +189,20 @@ function Edit() {
     }catch(err){
         console.log(err)
     }
-};
+  };
 
-const handleInfoChange = (e) => {
-  setInfo((prev) => ({...prev, [e.target.name]: e.target.value}));
-}
+  // keeps track of value of the name, subject and desc fields
+  const handleInfoChange = (e) => {
+    setInfo((prev) => ({...prev, [e.target.name]: e.target.value}));
+  }
 
+  // these functions will be fed to cardpair
   const functions = {
     updateCardInfo: updateCardInfo,
     addCard: addCard,
     deleteCard: deleteCard,
     moveUp: moveUp,
-    moveDown: moveDown
+    moveDown: moveDown,
   }
 
   return (
@@ -145,7 +230,14 @@ const handleInfoChange = (e) => {
         <div className="card-container">
           {info.cards.map(function(card, index) {
             return(
-              <CardPair key= {card.key} index={index} frontValue={card.front} backValue={card.back} functions={functions}></CardPair>
+              <CardPair key= {card.key} index={index} frontValue={card.front} backValue={card.back} functions={functions} ref={(node) => {
+                const map = getMap();
+                if (node) {
+                  map.set(card, node);
+                } else {
+                  map.delete(card)
+                }
+              }}></CardPair>
             )
           })}
         </div>
@@ -153,5 +245,5 @@ const handleInfoChange = (e) => {
     </div>      
   );
 }
-  
-  export default Edit;
+
+export default Edit;

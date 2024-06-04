@@ -1,18 +1,24 @@
-import React, {useState} from "react"
+import React, {useState, forwardRef, useEffect, useRef} from "react"
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import '../styles/Cards.css';
 
-function CardPair(props) {
+const CardPair = forwardRef((props, ref) => {
     const [frontValue, setFrontValue] = useState(props.frontValue)
     const [backValue, setBackValue] = useState(props.backValue)
 
     const handleFrontChange = (e) => {
+        if (e.includes("\t")) {
+            e = e.replace("\t", "")
+        }
         setFrontValue(prev => e)
         props.functions.updateCardInfo({index: props.index, frontValue: e, backValue: backValue})
     }
 
     const handleBackChange = (e) => {
+        if (e.includes("\t")) {
+            e = e.replace("\t", "")
+        }
         setBackValue(prev => e)
         props.functions.updateCardInfo({index: props.index, frontValue: frontValue, backValue: e})
     }
@@ -34,10 +40,10 @@ function CardPair(props) {
     }
 
     return (
-        <div className="cardPair">
+        <div className="cardPair" ref={ref}>
             <div>{props.index + 1}.</div>
-            <ReactQuill theme="snow" value={frontValue} onChange={handleFrontChange}/>
-            <ReactQuill theme="snow" value={backValue} onChange={handleBackChange}/>
+            <ReactQuill className={"front"} theme="snow" value={frontValue} onChange={handleFrontChange}/>
+            <ReactQuill className={"back"} theme="snow" value={backValue} onChange={handleBackChange}/>
             <div className="buttonContainer">
                 <button onClick={handleAddCard}><img src="/add.png" alt="add"></img></button>
                 <button onClick={handleDeleteCard}><img src="/trash.png" alt="delete"></img></button>
@@ -47,6 +53,6 @@ function CardPair(props) {
         </div>
         
     )
-}
+});
 
 export default CardPair
