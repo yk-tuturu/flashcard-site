@@ -40,7 +40,7 @@ const router = createBrowserRouter([
         element: <Create/>,
       },
       {
-        path: "/view",
+        path: "/view/:id",
         element: <View/>
       }
     ]

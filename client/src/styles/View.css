@@ -34,15 +34,14 @@
 
 .cardViewer {
     border: 1px solid grey;
-    height: 360px;
+    height: 330px;
     width: 70%;
     margin: auto;
     margin-top: 8px;
     padding: 20px 10px 5px 10px;
     overflow-x: hidden;
     overflow-y: visible;
-    position: absolute;
-    left: 14.1%;
+    position: relative;
 }
 
 .card {
@@ -52,6 +51,7 @@
     display: inline-block;
     position: relative;
     margin: 0px 30px;
+    overflow: visible;
     perspective: 1000px;
     background-color: transparent;
 }
@@ -64,13 +64,12 @@
     transition: transform 0.4s linear;
     transform-style: preserve-3d;
     transform: translateZ(-100px) rotateX(0deg);
-    border: 1px solid rgb(174, 174, 174);
-    border-radius: 10px;
+    overflow: visible;
+    
 }
 
 .active-card {
     transform: translateZ(0px) !important;
-    border: 1px solid rgb(145, 145, 145);
 }
 
 .flipped {
@@ -79,10 +78,12 @@
 
 .flip-card-front, .flip-card-back {
     position: absolute;
-    width: 100%;
-    height: 100%;
+    width: 99%;
+    height: 99%; /* hacky solution ik */
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+    border: 1px solid rgb(174, 174, 174);
+    border-radius: 10px;
   }
 
 .flip-card-front {
@@ -97,9 +98,15 @@
 .cardContainer {
     position: absolute;
     overflow-x: hidden;
-    overflow-y: visible;
     white-space: nowrap;
-    height: 360px;
+    height: 330px;
     padding: 0px 70px;
-    transition: transform 0.7s ease-in;
+    transition: transform 0.5s ease-in;
+}
+
+.shuffle {
+    margin: auto;
+    margin-top: 8px;
+    width: 70%;
+    text-align: left;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from "axios"
 import '../styles/View.css'
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -13,6 +13,12 @@ function View() {
     const [currentCard, setCurrentCard] = useState(0)
     const [currentSide, setCurrentSide] = useState("front")
 
+    // for shuffling
+    const [shuffle, setShuffle] = useState(false)
+    const [ogCards, setOgCards] = useState([])
+
+    // info about flashcards, which would eventually include the title, author, tags, bookmarks, etc
+    // right now it's just copied over from Edit.jsx
     const [info, setInfo] = useState({
         name: "",
         subject: "",
@@ -20,7 +26,10 @@ function View() {
         cards: [],
     });
 
+    // ref for the whole card container
     const scrollRef = useRef(null)
+
+    // ref to each individual card
     const cardsRef = useRef(null)
 
     function getMap() {
@@ -29,7 +38,10 @@ function View() {
         }
         return cardsRef.current
     }
-    const id = 7
+
+    // gets id and fetches corresponding card set
+    const location = useLocation()
+    const id = location.pathname.split("/")[2]
 
     useEffect(() => {
         const fetchData = async () => {
@@ -38,6 +50,9 @@ function View() {
               
               // parses flashcard content, which was originally stored as a JSON string in the database
               const newCards = JSON.parse(res.data[0].flashcards)
+
+              // keeps a record of the original order of cards, for when we would shuffle it later
+              setOgCards(newCards)
               
               setInfo({
                 name: res.data[0].name,
@@ -53,11 +68,14 @@ function View() {
         fetchData()
     }, [id])
 
+    // flips the card when down arrow pressed
     useEffect(() => {
         const DownFunction = (event) => {
           if (event.key === "ArrowDown") {
             const map = getMap()
             const node = map.get(info.cards[currentCard])
+
+            // adds/removes the flipped class to toggle the flipping
             if (currentSide === "front") {
                 node.className += " flipped"
                 setCurrentSide("back")
@@ -74,19 +92,26 @@ function View() {
           document.removeEventListener("keydown", DownFunction, false);
         };
       }, [cardsRef, currentCard, info, currentSide]);
-
+    
+    // shifts one card to the right 
     useEffect(() => {
         const RightFunction = (event) => {
           if (event.key === "ArrowRight") {
+            // if at the end, return
             if (currentCard === info.cards.length - 1) {
                 return
             }
+
+            // gets the ref map
             const map = getMap()
             const node = map.get(info.cards[currentCard])
+
+            // removes the active card class and unflips the card
             node.className = node.className.replace(" active-card", "")
             node.className = node.className.replace(" flipped", "")
             setCurrentSide("front")
-
+            
+            // we only set the index here, the actual moving will take place in another useEffect
             setCurrentCard(currentCard => Math.min(currentCard + 1, info.cards.length - 1))
           }
         }
@@ -96,7 +121,8 @@ function View() {
           document.removeEventListener("keydown", RightFunction, false);
         };
       }, [scrollRef, currentCard, currentSide, info]);
-
+    
+    // same thing but for moving to the left
     useEffect(() => {
     const LeftFunction = (event) => {
         if (event.key === "ArrowLeft") {
@@ -119,16 +145,65 @@ function View() {
     };
     }, [scrollRef, currentCard, currentSide, info]);
 
+    // detects any changes in card index, and shifts the position accordingly
     useEffect(() => {
         scrollRef.current.style.transform = `translateX(${-760 * (currentCard)}px)`
+
+        // adds the active-card class to the newly active card
         const map = getMap()
         const currentNode = map.get(info.cards[currentCard])
         console.log()
         if (currentNode && !currentNode.className.includes("active-card")) {
             currentNode.className += " active-card"
-            
         }
-    }, [scrollRef, currentCard, currentSide, info.cards])
+    }, [scrollRef, currentCard, currentSide, info])
+
+    
+    // utility function for shuffling an array
+    function shuffleArray(array) {
+        let currentIndex = array.length;
+      
+        // While there remain elements to shuffle...
+        while (currentIndex !== 0) {
+      
+          // Pick a remaining element...
+          let randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex--;
+      
+          // And swap it with the current element.
+          [array[currentIndex], array[randomIndex]] = [
+            array[randomIndex], array[currentIndex]];
+        }
+
+        return array
+    }
+
+    // handles shuffling of the cards
+    const toggleShuffle = (e) => {
+        // sets the shuffle value
+        const newValue = !shuffle
+        setShuffle(newValue)
+
+        // if true, shuffle cards
+        if (newValue) {
+            const oldCards = info.cards.slice()
+            const shuffledCards = shuffleArray(oldCards)
+            setInfo((prev) => ({...prev, cards: shuffledCards}));
+        }
+
+        // else, replace the shuffled array with the original
+        else {
+            console.log(ogCards)
+            setInfo((prev) => ({...prev, cards: ogCards}))
+        }
+
+        // removes the active class from all cards so that it can be reset
+        const map = getMap()
+        for (let [card, node] of map) {
+            node.className = node.className.replace(" active-card", "")
+            node.className = node.className.replace(" flipped", "")
+        }
+    }
 
     return (
         <div>
@@ -164,6 +239,12 @@ function View() {
                         )
                     })}
                 </div>
+            </div>
+            <div className='shuffle'>
+                <label>Shuffle
+                    <input type="checkbox" onChange={toggleShuffle}></input>
+                    <span className="checkmark"></span>
+                </label>
             </div>
             
 
