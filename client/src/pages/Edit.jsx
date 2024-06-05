@@ -21,7 +21,6 @@ function Edit() {
     cards: [],
   });
   const [appended, setAppended] = useState(false)
-
   const cardsRef = useRef(null);
 
   function getMap() {
@@ -30,14 +29,6 @@ function Edit() {
     }
     return cardsRef.current
   }
-
-  // useEffect(() => {
-  //   if (focusedElement) {
-  //     focusedElement.value && console.log(focusedElement);
-  //   }
-  //  console.log(focusedElement.parentElement.parentElement);
-  // }, [focusedElement])
-
 
   // to know which flashset we are supposed to fetch, we read the url
   const location = useLocation()
@@ -129,7 +120,7 @@ function Edit() {
     }
   }, [appended, info]);
 
-  
+
   // a bunch of functions for adding and deleting and moving cards
   function updateCardInfo(data) {
     const newCards = info.cards.map(function(card, index) {

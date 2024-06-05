@@ -5,6 +5,8 @@ import Navbar from "./pages/Navbar";
 import Edit from "./pages/Edit";
 import Register from "./pages/Register";
 import Create from "./pages/Create";
+import View from "./pages/View";
+
 import {
   Outlet,
   createBrowserRouter,
@@ -36,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "/create",
         element: <Create/>,
+      },
+      {
+        path: "/view",
+        element: <View/>
       }
     ]
   },

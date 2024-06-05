@@ -1,0 +1,105 @@
+.viewHeader {
+    width: 70%;
+    margin: auto;
+    margin-top: 70px;
+    padding: 20px 10px 5px 10px;
+    text-align: left;
+    border: 1px solid rgb(134, 134, 134);
+    display: block;
+}
+
+.viewHeader h1{
+    padding: 2px;
+    margin: 3px;
+}
+
+.viewHeader p{
+    padding: 2px;
+    margin: 3px;
+}
+
+.viewHeaderBottom {
+    display: grid;
+    grid-template-columns: 1fr 0.1fr 0.1fr;
+}
+
+.viewHeader button{
+    float: right;
+    display: inline-flex;
+    align-items: flex-end;
+    width: 70px;
+    height: 20px;
+    margin: auto
+}
+
+.cardViewer {
+    border: 1px solid grey;
+    height: 360px;
+    width: 70%;
+    margin: auto;
+    margin-top: 8px;
+    padding: 20px 10px 5px 10px;
+    overflow-x: hidden;
+    overflow-y: visible;
+    position: absolute;
+    left: 14.1%;
+}
+
+.card {
+    width: 700px;
+    height: 300px;
+    transition: transform 0.6s ease-in;
+    display: inline-block;
+    position: relative;
+    margin: 0px 30px;
+    perspective: 1000px;
+    background-color: transparent;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.4s linear;
+    transform-style: preserve-3d;
+    transform: translateZ(-100px) rotateX(0deg);
+    border: 1px solid rgb(174, 174, 174);
+    border-radius: 10px;
+}
+
+.active-card {
+    transform: translateZ(0px) !important;
+    border: 1px solid rgb(145, 145, 145);
+}
+
+.flipped {
+    transform: rotateX(180deg) !important;
+}
+
+.flip-card-front, .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+.flip-card-front {
+    background-color: white;
+  }
+  
+.flip-card-back {
+    background-color: white;
+    transform: rotateX(180deg);
+}
+
+.cardContainer {
+    position: absolute;
+    overflow-x: hidden;
+    overflow-y: visible;
+    white-space: nowrap;
+    height: 360px;
+    padding: 0px 70px;
+    transition: transform 0.7s ease-in;
+}
