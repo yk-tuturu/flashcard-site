@@ -6,7 +6,7 @@ function HomeListItem({info}) {
     const navigate = useNavigate()
 
     function handleClick() {
-        navigate(`/edit/${info.id}`)
+        navigate(`/view/${info.id}`)
     }
     return (
         

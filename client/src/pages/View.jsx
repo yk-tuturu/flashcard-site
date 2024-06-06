@@ -70,8 +70,9 @@ function View() {
 
     // flips the card when down arrow pressed
     useEffect(() => {
-        const DownFunction = (event) => {
-          if (event.key === "ArrowDown") {
+        const DownFunction = (event) => { 
+          if (event.key === "ArrowDown" || event.key === " ") {
+            event.preventDefault() 
             const map = getMap()
             const node = map.get(info.cards[currentCard])
 
@@ -109,6 +110,13 @@ function View() {
             // removes the active card class and unflips the card
             node.className = node.className.replace(" active-card", "")
             node.className = node.className.replace(" flipped", "")
+
+            // also scrolls any scrollables back to top and unfocuses
+            for (const child of node.children) {
+                child.scrollTop = 0
+            }
+            document.activeElement.blur()
+
             setCurrentSide("front")
             
             // we only set the index here, the actual moving will take place in another useEffect
@@ -208,7 +216,7 @@ function View() {
     return (
         <div>
             <div className="viewHeader">
-                <h1>Title</h1>
+                <h1>{info.name}</h1>
                 <div className='viewHeaderBottom'>
                     <p>By Tuturu on 23/5/2024</p>
                     <button>Like</button>
