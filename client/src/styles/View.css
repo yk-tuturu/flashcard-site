@@ -35,9 +35,8 @@
 .cardViewer {
     border: 1px solid grey;
     height: 330px;
-    width: 70%;
+    width: 900px;
     margin: auto;
-    margin-top: 8px;
     padding: 20px 10px 5px 10px;
     overflow-x: hidden;
     overflow-y: visible;
@@ -114,4 +113,42 @@
     margin-top: 8px;
     width: 70%;
     text-align: left;
+}
+
+.cardNumber {
+    margin-top: 300px;
+    position: relative;
+}
+
+.cardNumber input {
+    width: 80px;
+}
+
+.tab-bar {
+    background-color: rgb(231, 231, 231);
+    margin: auto;
+    margin-top: 20px;
+    width: 920px;
+    border: 1px solid grey;
+    border-bottom: none;
+    height: 46px;
+}
+
+.tab-item {
+    height: 100%;
+    border: none;
+    background-color: rgb(231, 231, 231);
+    font-size: 18px;
+    padding: 0px 16px;
+    float: left;
+}
+
+.tab-item-active {
+    height: 100%;
+    border: none;
+    background-color: rgb(94, 94, 94);
+    font-size: 18px;
+    color: white;
+    padding: 0px 16px;
+    float: left;
 }

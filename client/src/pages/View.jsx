@@ -4,6 +4,7 @@ import '../styles/View.css'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from "../context/authContext";
 import parse from "html-react-parser"
+import {shuffleArray, isNumeric} from '../util.js'
 
 function View() {
     // later will use to enable the author to link directly to edit page
@@ -12,6 +13,7 @@ function View() {
     // tracks current card index and side (not sure if we need the side but oh well)
     const [currentCard, setCurrentCard] = useState(0)
     const [currentSide, setCurrentSide] = useState("front")
+    const [cardIndex, setCardIndex] = useState(0)
 
     // for shuffling
     const [shuffle, setShuffle] = useState(false)
@@ -160,31 +162,13 @@ function View() {
         // adds the active-card class to the newly active card
         const map = getMap()
         const currentNode = map.get(info.cards[currentCard])
-        console.log()
+
         if (currentNode && !currentNode.className.includes("active-card")) {
             currentNode.className += " active-card"
         }
+
+        setCardIndex(currentCard + 1);
     }, [scrollRef, currentCard, currentSide, info])
-
-    
-    // utility function for shuffling an array
-    function shuffleArray(array) {
-        let currentIndex = array.length;
-      
-        // While there remain elements to shuffle...
-        while (currentIndex !== 0) {
-      
-          // Pick a remaining element...
-          let randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex--;
-      
-          // And swap it with the current element.
-          [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
-        }
-
-        return array
-    }
 
     // handles shuffling of the cards
     const toggleShuffle = (e) => {
@@ -213,6 +197,26 @@ function View() {
         }
     }
 
+    const handleCardIndex = (e) => {
+        setCardIndex((prev) => e.target.value);
+        console.log(e.target.value)
+        if (isNumeric(e.target.value)) {
+            const targetIndex = parseInt(e.target.value)
+
+            if (targetIndex > 0 && targetIndex <= info.cards.length) {
+                setCurrentCard(targetIndex - 1);
+            }
+
+            else if (targetIndex <= 0) {
+                setCurrentCard(0)
+            }
+
+            else if (targetIndex > info.cards.length) {
+                setCurrentCard(info.cards.length - 1)
+            }
+        }
+    }
+
     return (
         <div>
             <div className="viewHeader">
@@ -222,6 +226,10 @@ function View() {
                     <button>Like</button>
                     <button>Bookmark</button>
                 </div>
+            </div>
+            <div className="tab-bar">
+                <button className="tab-item-active">Flashcards</button>
+                <button className="tab-item">Memorize</button>
             </div>
             <div className="cardViewer">
                 <div className="cardContainer" ref={scrollRef}>
@@ -246,6 +254,9 @@ function View() {
                             </div>
                         )
                     })}
+                </div>
+                <div className="cardNumber">
+                    <span><input value={cardIndex} onChange={handleCardIndex}></input></span> of {info.cards.length}
                 </div>
             </div>
             <div className='shuffle'>
