@@ -240,7 +240,7 @@ function View() {
             {mode === "flash" ? (
                 <Flashcards cards={info.cards} cardIndex={cardIndex} ref={mainRef} functions={functions}></Flashcards>
             ) : (
-                <Memorize></Memorize>
+                <Memorize cards={info.cards} cardIndex={cardIndex} ref={mainRef} functions={functions}></Memorize>
             )}
             
             
