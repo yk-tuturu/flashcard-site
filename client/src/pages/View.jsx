@@ -70,10 +70,24 @@ function View() {
         fetchData()
     }, [id])
 
-    function flipCard() { 
+    function flipCard(key = undefined) { 
+        console.log(key)
         const map = mainRef.current.cards
-        const node = map.get(info.cards[currentCard])
-        console.log(info)
+        let cardToFlip;
+        if (key === undefined) {
+            cardToFlip = info.cards[currentCard]
+        }
+        else {
+            for (let i in info.cards) {
+                if (key === info.cards[i].key) {
+                    console.log("found the card!!")
+                    cardToFlip = info.cards[i]
+                }
+            }
+        }
+        console.log(cardToFlip)
+        const node = map.get(cardToFlip)
+        console.log(node)
 
         // adds/removes the flipped class to toggle the flipping
         if (currentSide === "front") {
@@ -86,7 +100,7 @@ function View() {
         }
     }
 
-    function moveRight() {
+    function moveRight(key = undefined) {
         // if at the end, return
         if (currentCard === info.cards.length - 1) {
             return
@@ -94,7 +108,18 @@ function View() {
 
         // gets the ref map
         const map = mainRef.current.cards
-        const node = map.get(info.cards[currentCard])
+        let cardToFlip;
+        if (key === undefined) {
+            cardToFlip = info.cards[currentCard]
+        }
+        else {
+            for (let i in info.cards) {
+                if (key === info.cards[i].key) {
+                    cardToFlip = info.cards[i]
+                }
+            }
+        }
+        const node = map.get(cardToFlip)
 
         // removes the active card class and unflips the card
         node.className = node.className.replace(" active-card", "")
@@ -190,37 +215,60 @@ function View() {
         }
     }
 
+    const saveProgress = async() => {
+        const cardData = mainRef.current.getSaveData()
+        const data = {
+            user_id: currentUser.id,
+            flashset_id: id,
+            cards: cardData
+        }
+        try {
+            const res = await axios.post(`http://localhost:8800/api/progress/saveProgress`, data)
+          }
+          catch(err) {
+            console.log(err)
+          }
+    }
+
+    const resetAll = () => {
+        console.log("reset called")
+        setCurrentCard(0)
+        setCurrentSide("front")
+        setCardIndex(1)
+        setShuffle(false)
+
+        const map = mainRef.current.cards
+        for (let [card, node] of map) {
+            node.className = node.className.replace(" active-card", "")
+            node.className = node.className.replace(" flipped", "")
+        }
+    }
+
+    const changeTab = (tabName, event) => {
+        if (tabName === "flashcards") {
+            saveProgress()
+            event.target.className = "tab-item-active"
+            document.getElementById("memo").className = "tab-item"
+            setMode("flash")
+            resetAll()
+        }
+        else if (tabName === "memo") {
+            event.preventDefault();
+            event.target.className = "tab-item-active"
+            document.getElementById("flash").className = "tab-item"
+            setMode("memo")
+            resetAll()
+        }
+    }
+
     const functions = {
         flipCard: flipCard,
         moveRight: moveRight,
         moveLeft: moveLeft,
         handleCardIndex: handleCardIndex,
-        toggleShuffle: toggleShuffle
+        toggleShuffle: toggleShuffle,
+        resetAll: resetAll
     }
-
-    const changeTab = (tabName, event) => {
-        if (tabName === "flashcards") {
-            event.target.className = "tab-item-active"
-            document.getElementById("memo").className = "tab-item"
-            setMode("flash")
-            
-            setCurrentCard(0)
-            setCurrentSide("front")
-            setCardIndex(1)
-            setShuffle(false)
-        }
-        else if (tabName === "memo") {
-            event.target.className = "tab-item-active"
-            document.getElementById("flash").className = "tab-item"
-            setMode("memo")
-
-            setCurrentCard(0)
-            setCurrentSide("front")
-            setCardIndex(1)
-            setShuffle(false)
-        }
-    }
-
 
 
     return (
@@ -238,9 +286,9 @@ function View() {
                 <button id="memo" className="tab-item" onClick={(event) => changeTab("memo", event)}>Memorize</button>
             </div>
             {mode === "flash" ? (
-                <Flashcards cards={info.cards} cardIndex={cardIndex} ref={mainRef} functions={functions}></Flashcards>
+                <Flashcards cards={info.cards} currentCard={currentCard} cardIndex={cardIndex} ref={mainRef} functions={functions}></Flashcards>
             ) : (
-                <Memorize cards={info.cards} cardIndex={cardIndex} ref={mainRef} functions={functions}></Memorize>
+                <Memorize user_id = {currentUser.id} flashset_id = {id} cards={info.cards} cardIndex={cardIndex} currentCard={currentCard} ref={mainRef} functions={functions}></Memorize>
             )}
             
             

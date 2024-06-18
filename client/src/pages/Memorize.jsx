@@ -2,9 +2,47 @@ import React, {useState, useEffect, useRef, useImperativeHandle, forwardRef} fro
 import parse from "html-react-parser"
 import {shuffleArray, isNumeric} from '../util.js'
 import "../styles/View.css"
+import axios from "axios"
 
 const Memorize = (props, ref) => {
-    const cards = props.cards;
+    const [cards, setCards] = useState([])
+    const [saveData, setSaveData] = useState([])
+    const [flipped, setFlipped] = useState(false)
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+              const res = await axios.get(`http://localhost:8800/api/progress/getFlashProgress`, {
+                params: {
+                    user_id: props.user_id,
+                    flashset_id: props.flashset_id
+                }
+              })
+              const newSaveData = JSON.parse(res.data[0].cards)
+
+              // if save data is same length, means we prolly already finished all in a previous round, 
+              // so begin with empty array
+              if (newSaveData.length === props.cards.length) {
+                newSaveData = []
+              }
+
+              setSaveData(newSaveData)
+              setCards(props.cards.map(function(card, index) {
+                    if (!newSaveData.includes(card.key)){
+                        return card
+                    }
+                }).filter(function(element) {
+                    return element !== undefined
+                }))
+            }
+            catch(err) {
+              console.log(err)
+            }
+          };
+        fetchData()
+    }, [props.user_id, props.flashset_id])
+
+
     const [menuState, setMenuState] = useState(true) 
 
     // ref for the whole card container
@@ -13,9 +51,16 @@ const Memorize = (props, ref) => {
     // ref to each individual card
     const cardsRef = useRef(new Map())
 
+    // ref to the start menu screen
     const startRef = useRef(null)
 
+    // ref to the start menu screen
+    const finishRef = useRef(null)
+
     useImperativeHandle(ref, () => ({
+        getSaveData() {
+            return saveData
+        },
         get scroll() {
             return scrollRef.current;
         },
@@ -24,67 +69,127 @@ const Memorize = (props, ref) => {
         },
     }));
 
+    const CorrectFunction = (event) => {
+        event.preventDefault()
+
+        if (menuState || !flipped) {return}
+
+        setFlipped(false)
+        console.log("correct function called")
+
+        // writes to save data that we got this card correct
+        if (!saveData.includes(cards[props.currentCard].key)) {
+            setSaveData([...saveData, cards[props.currentCard].key])
+        }
+
+        if (props.currentCard >= cards.length - 1) {
+            // loop back to menu state once we reach here
+            let newSaveData = [...saveData, cards[props.currentCard].key]
+
+            if (newSaveData.length === props.cards.length) {
+                newSaveData = []
+                setSaveData([])
+                enableFinishMenu()
+            }
+            else {
+                enableMenu()
+            }
+
+            props.functions.resetAll()
+            setCards(props.cards.map(function(card, index) {
+                if (!newSaveData.includes(card.key)){
+                    return card
+                }
+            }).filter(function(element) {
+                return element !== undefined
+            }))
+            return
+        }
+        
+        props.functions.moveRight(cards[props.currentCard].key)
+    }
+
+    const WrongFunction = (event) => {
+        event.preventDefault()
+
+        if (menuState || !flipped || props.currentCard >= cards.length - 1) {return}
+
+        if (props.currentCard >= cards.length - 1) {
+            // loop back to menu state once we reach here
+        }
+    
+        setFlipped(false)
+        props.functions.moveRight(cards[props.currentCard].key)
+    }
+
+    const FlipFunction = (event) => {
+        if (menuState) {return}
+
+        console.log(cards)
+
+        event.preventDefault()
+        if (!flipped) {
+            setFlipped(true)
+        }
+
+        props.functions.flipCard(cards[props.currentCard].key)
+    }
+
     useEffect(() => {
-        const RightFunction = (event) => {
+        const buttonDown = (event) => {
             if (menuState) {return}
-            if (event.key === "ArrowRight") {
-                event.preventDefault()
-                props.functions.moveRight()
+            if (event.key === "r") {
+                CorrectFunction(event)
+            }
+
+            if (event.key === "w") {
+                WrongFunction(event)
+            }
+
+            if (event.key === "ArrowDown" || event.key===" ") {
+                FlipFunction(event)
             }
         }
-        document.addEventListener("keydown", RightFunction, false);
+        document.addEventListener("keydown", buttonDown, false);
 
         return () => {
-            document.removeEventListener("keydown", RightFunction, false);
+            document.removeEventListener("keydown", buttonDown, false);
         };
-    }, [props.functions, menuState])
-
-    useEffect(() => {
-        const LeftFunction = (event) => {
-            if (menuState) {return}
-
-            if (event.key === "ArrowLeft") {
-                event.preventDefault()
-                props.functions.moveLeft()
-            }
-        }
-        document.addEventListener("keydown", LeftFunction, false);
-
-        return () => {
-            document.removeEventListener("keydown", LeftFunction, false);
-        };
-    }, [props.functions, menuState])
-
-    useEffect(() => {
-        const DownFunction = (event) => {
-            if (menuState) {return}
-
-            if (event.key === "ArrowDown") {
-                event.preventDefault()
-                props.functions.flipCard()
-            }
-        }
-        document.addEventListener("keydown", DownFunction, false);
-
-        return () => {
-            document.removeEventListener("keydown", DownFunction, false);
-        };
-    }, [props.functions, menuState])
+    }, [props.functions, menuState, props.currentCard, cards, CorrectFunction, FlipFunction])
 
     function disableMenu() {
         startRef.current.style.display = "none"
+        finishRef.current.style.display = "none"
         scrollRef.current.style.display = "block"
         setMenuState(false)
+    }
+
+    function enableMenu() {
+        startRef.current.style.display = "block"
+        scrollRef.current.style.display = "none"
+        setMenuState(true)
+    }
+
+    function enableFinishMenu() {
+        finishRef.current.style.display = "block"
+        scrollRef.current.style.display = "none"
+        setMenuState(true)
     }
 
     return(
         <div className="cardViewer">
             <div className="startScreen" ref={startRef}>
                 <p>Cram everything you need to know in one sitting!</p>
-                <p>You have <b>{cards.length}</b> of <b>{cards.length}</b> cards remaining</p>
+                <p>You have <b>{cards.length}</b> of <b>{props.cards.length}</b> cards remaining</p>
                 <p>Click on the Yes and No buttons to indicate if you've remembered the card</p>
                 <p>Shortcuts: ArrowDown/Space to flip, R for Right, W for Wrong</p>
                 <button onClick={disableMenu}>Start Memorizing Now!</button>
+            </div>
+
+            <div className="startScreen hidden" ref={finishRef}>
+                <p>You have memorized all the cards!!</p>
+                <p>Do you wish to go again?</p>
+                <button onClick={disableMenu}>Begin new round</button>
             </div>
             
             <div className="cardContainer hidden" ref={scrollRef}>
@@ -110,9 +215,16 @@ const Memorize = (props, ref) => {
                     )
                 })}
             </div>
-            <div className="cardNumber">
-                <span><input value={props.cardIndex} onChange={props.functions.handleCardIndex}></input></span> of {cards.length}
-            </div>
+            {flipped ? (
+                <div className="cardNumber">
+                    <span><button onClick={CorrectFunction}>Yes I rememeber</button><button onClick={WrongFunction}>No, I forgor</button></span>
+                </div>
+            ) : (
+                <div className="cardNumber">
+                    <span><button onClick={FlipFunction}>Flip to the back</button></span>
+                </div>
+            )}
+            
         </div>
     )
 }

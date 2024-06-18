@@ -22,44 +22,27 @@ const Flashcards = forwardRef((props, ref) => {
       }));
 
     useEffect(() => {
-        const RightFunction = (event) => {
+        const ButtonDown = (event) => {
             if (event.key === "ArrowRight") {
                 event.preventDefault()
                 props.functions.moveRight()
             }
-        }
-        document.addEventListener("keydown", RightFunction, false);
 
-        return () => {
-            document.removeEventListener("keydown", RightFunction, false);
-        };
-    }, [props.functions])
-
-    useEffect(() => {
-        const LeftFunction = (event) => {
             if (event.key === "ArrowLeft") {
                 event.preventDefault()
                 props.functions.moveLeft()
             }
-        }
-        document.addEventListener("keydown", LeftFunction, false);
 
-        return () => {
-            document.removeEventListener("keydown", LeftFunction, false);
-        };
-    }, [props.functions])
-
-    useEffect(() => {
-        const DownFunction = (event) => {
             if (event.key === "ArrowDown") {
                 event.preventDefault()
                 props.functions.flipCard()
             }
+
         }
-        document.addEventListener("keydown", DownFunction, false);
+        document.addEventListener("keydown", ButtonDown, false);
 
         return () => {
-            document.removeEventListener("keydown", DownFunction, false);
+            document.removeEventListener("keydown", ButtonDown, false);
         };
     }, [props.functions])
 
