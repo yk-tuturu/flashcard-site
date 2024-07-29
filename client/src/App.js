@@ -6,6 +6,7 @@ import Edit from "./pages/Edit";
 import Register from "./pages/Register";
 import Create from "./pages/Create";
 import View from "./pages/View";
+import Account from "./pages/Account";
 
 import {
   Outlet,
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "/view/:id",
         element: <View/>
+      },
+      {
+        path: "/account",
+        element: <Account/>
       }
     ]
   },

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import axios from "axios"
 import '../styles/View.css'
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useBlocker } from 'react-router-dom';
 import { AuthContext } from "../context/authContext";
 import parse from "html-react-parser"
 import {shuffleArray, isNumeric} from '../util.js'
@@ -21,12 +21,16 @@ function View() {
     const [shuffle, setShuffle] = useState(false)
     const [ogCards, setOgCards] = useState([])
 
+    const [bookmarked, setBookmarked] = useState(false)
+
     const [mode, setMode] = useState("flash")
 
     // info about flashcards, which would eventually include the title, author, tags, bookmarks, etc
     // right now it's just copied over from Edit.jsx
     const [info, setInfo] = useState({
         name: "",
+        authorId: 0,
+        authorName: "",
         subject: "",
         description: "",
         cards: [],
@@ -34,14 +38,6 @@ function View() {
 
     const mainRef = useRef(null)
 
-    // function getMap() {
-    //     if (!cardsRef.current) {
-    //       cardsRef.current = new Map();
-    //     }
-    //     return cardsRef.current
-    // }
-
-    // gets id and fetches corresponding card set
     const location = useLocation()
     const id = location.pathname.split("/")[2]
 
@@ -49,6 +45,7 @@ function View() {
         const fetchData = async () => {
             try {
               const res = await axios.get(`http://localhost:8800/api/cards/${id}`)
+              console.log(res.data)
               
               // parses flashcard content, which was originally stored as a JSON string in the database
               const newCards = JSON.parse(res.data[0].flashcards)
@@ -58,17 +55,35 @@ function View() {
               
               setInfo({
                 name: res.data[0].name,
+                authorId: res.data[0].user_id,
+                authorName: res.data[0].username,
                 subject: res.data[0].subject,
                 description: res.data[0].description,
                 cards: newCards
               })
+
+              let bookmark;
+              if (currentUser.id) {
+                bookmark = await axios.get(`http://localhost:8800/api/users/bookmark/${currentUser.id}`)
+              }
+
+              console.log(bookmark)
+
+              for (let index in bookmark.data) {
+                console.log(bookmark.data[index].flashset_id)
+                if (bookmark.data[index].flashset_id === parseInt(id)) {
+                    console.log("we already bookmarked")
+                    setBookmarked(true)
+                    break
+                }
+              }
             }
             catch(err) {
               console.log(err)
             }
           };
         fetchData()
-    }, [id])
+    }, [id, currentUser, setBookmarked])
 
     function flipCard(key = undefined) { 
         console.log(key)
@@ -216,6 +231,9 @@ function View() {
     }
 
     const saveProgress = async() => {
+        if (!currentUser) {
+            return
+        }
         const cardData = mainRef.current.getSaveData()
         const data = {
             user_id: currentUser.id,
@@ -270,15 +288,74 @@ function View() {
         resetAll: resetAll
     }
 
+    let blocker = useBlocker(
+        ({ currentLocation, nextLocation }) =>
+          mode === "memo" &&
+          currentLocation.pathname !== nextLocation.pathname
+      );
+    
+    const toggleBookmark = async() => {
+        if (!currentUser) {
+            return
+        }
+
+        const data = {
+            user_id: currentUser.id,
+            flashset_id: id
+        }
+
+        try {
+            if (!bookmarked) {
+                await axios.post(`http://localhost:8800/api/users/setBookmark`, data)
+            }
+            else {
+                await axios.post(`http://localhost:8800/api/users/deleteBookmark`, data)
+            }
+
+            setBookmarked(!bookmarked)
+            
+          }
+          catch(err) {
+            console.log(err)
+          }
+    }
+
 
     return (
         <div>
+            {blocker.state === "blocked" ? (
+                <div className="on-nav-away">
+                <p>Are you sure you want to leave? Your progress will be saved.</p>
+                <button onClick={async() => {
+                    await saveProgress()
+                    blocker.proceed()}}>
+                    Save my progress
+                </button>
+                <button onClick={() => blocker.reset()}>
+                    No go back
+                </button>
+                </div>
+            ) : null}
             <div className="viewHeader">
                 <h1>{info.name}</h1>
                 <div className='viewHeaderBottom'>
-                    <p>By Tuturu on 23/5/2024</p>
-                    <button>Like</button>
-                    <button>Bookmark</button>
+                    <p>By {info.authorName} on 23/5/2024</p>
+                    <div>
+                        {bookmarked === true ? (
+                            <button onClick={toggleBookmark}>Bookmarked</button>
+                        ) : (
+                            <button onClick={toggleBookmark}>Bookmark</button>
+                        )}
+                        <button>Like</button>
+                        { currentUser && currentUser.id === info.authorId ? (
+                            <>
+                                <button>Delete</button>
+                                <button>Edit</button>
+                            </>
+                        ) : (<></>)}
+                        
+                    </div>
+                    
                 </div>
             </div>
             <div className="tab-bar">
@@ -288,7 +365,7 @@ function View() {
             {mode === "flash" ? (
                 <Flashcards cards={info.cards} currentCard={currentCard} cardIndex={cardIndex} ref={mainRef} functions={functions}></Flashcards>
             ) : (
-                <Memorize user_id = {currentUser.id} flashset_id = {id} cards={info.cards} cardIndex={cardIndex} currentCard={currentCard} ref={mainRef} functions={functions}></Memorize>
+                <Memorize flashset_id = {id} cards={info.cards} cardIndex={cardIndex} currentCard={currentCard} ref={mainRef} functions={functions}></Memorize>
             )}
             
             

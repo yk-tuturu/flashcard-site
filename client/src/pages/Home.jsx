@@ -15,10 +15,12 @@ function Home() {
         console.log(res.data)
 
         const newDecks = res.data.map((deck) => {
+
+          console.log(deck.username)
           return ({
             id: deck.id,
             name: deck.name,
-            author: deck.user_id,
+            author: deck.username,
             subject: deck.subject,
             likes: deck.likes,
             bookmarks: deck.bookmarks,

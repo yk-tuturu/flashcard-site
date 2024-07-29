@@ -6,9 +6,10 @@ import '../styles/Cards.css'
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from "../context/authContext";
 
+
 function Edit() {
   // to make sure we have perms to edit this
-  const {currentUser, login} = useContext(AuthContext)
+  const {currentUser} = useContext(AuthContext)
 
   // navigation
   const navigate = useNavigate()

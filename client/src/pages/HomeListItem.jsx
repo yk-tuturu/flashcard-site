@@ -13,7 +13,7 @@ function HomeListItem({info}) {
         <div className="home-list-item" onClick={handleClick}>
             <div className="home-list-left">
                 <h2>{info.name}</h2>
-                <p className="author">Author: Tuturu</p>
+                <p className="author">Author: {info.author}</p>
                 <p>Subject: {info.subject}</p>
                 <span style={{marginRight: "16px"}}>Likes: {info.likes} </span> <span>Bookmark: {info.bookmarks}</span>
                 </div>

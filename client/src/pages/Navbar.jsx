@@ -10,7 +10,7 @@ function Navbar() {
         {currentUser ? (
           <>
             <Link className="nav-item" to="/login" onClick={logout}>Logout</Link>
-            <Link className="nav-item">Account</Link>
+            <Link className="nav-item" to="/account">Account</Link>
           </>
         ) : (
           <Link className="nav-item" to="/login">Login</Link>
@@ -18,7 +18,7 @@ function Navbar() {
         
         <Link className="nav-item" to="/create">Create</Link>
         <Link className="nav-item" to="/">Browse</Link>
-        <li className="nav-item" style={{float: "left",}}><a href="/">YK's flashcards</a></li>
+        <Link className="nav-item" style={{float: "left",}} to="/">YK's flashcards</Link>
       </ul>
     );
   }

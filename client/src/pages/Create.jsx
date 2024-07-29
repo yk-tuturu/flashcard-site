@@ -1,20 +1,30 @@
 import axios from "axios";
 import '../styles/Cards.css';
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from "react-router-dom"
 import { AuthContext } from "../context/authContext";;
 
 function Create() {
+    const navigate = useNavigate()
+
     const {currentUser, login} = useContext(AuthContext)
 
     const [info, setInfo] = useState({
         name: "",
         subject: "",
         description: "",
-        user_id: currentUser.id,
+        user_id: "",
     });
 
-    const navigate = useNavigate()
+    useEffect(() => {
+      if (!currentUser) {
+        navigate("/login")
+      }
+      else {
+        setInfo((prev) => ({...prev, user_id: currentUser.id}))
+      }
+    }, [])
+    
   
     const createFlashSet = async(e) => {
       e.preventDefault()

@@ -20,16 +20,14 @@
 
 .viewHeaderBottom {
     display: grid;
-    grid-template-columns: 1fr 0.1fr 0.1fr;
+    grid-template-columns: 1fr 1fr;
 }
 
 .viewHeader button{
     float: right;
     display: inline-flex;
     align-items: flex-end;
-    width: 70px;
-    height: 20px;
-    margin: auto
+    margin: 10px 5px;
 }
 
 .cardViewer {
@@ -167,4 +165,17 @@
 
 .hidden {
     display: none;
+}
+
+.on-nav-away {
+    position: absolute;
+    background-color: white;
+    border: 1px solid rgb(138, 138, 138);
+    border-radius: 10px;
+    box-shadow: 8px 8px 4px rgba(0, 0, 0, 0.3);
+    padding: 30px 40px;
+    z-index: 3;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
 }

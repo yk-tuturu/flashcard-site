@@ -47,7 +47,7 @@ const Flashcards = forwardRef((props, ref) => {
     }, [props.functions])
 
     return(
-        <>
+        <div style={{marginBottom: "30px",}}>
             <div className="cardViewer">
                 <div className="cardContainer" ref={scrollRef}>
                     {cards.map(function(card, index) {
@@ -82,7 +82,7 @@ const Flashcards = forwardRef((props, ref) => {
                     <span className="checkmark"></span>
                 </label>
             </div>
-        </>
+        </div>
     )
 })
 

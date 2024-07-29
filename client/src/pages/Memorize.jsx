@@ -1,47 +1,16 @@
-import React, {useState, useEffect, useRef, useImperativeHandle, forwardRef} from "react"
+import React, {useState, useEffect, useRef, useImperativeHandle, forwardRef, useContext} from "react"
 import parse from "html-react-parser"
 import {shuffleArray, isNumeric} from '../util.js'
 import "../styles/View.css"
 import axios from "axios"
+import { AuthContext } from "../context/authContext.js"
 
 const Memorize = (props, ref) => {
     const [cards, setCards] = useState([])
     const [saveData, setSaveData] = useState([])
     const [flipped, setFlipped] = useState(false)
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-              const res = await axios.get(`http://localhost:8800/api/progress/getFlashProgress`, {
-                params: {
-                    user_id: props.user_id,
-                    flashset_id: props.flashset_id
-                }
-              })
-              const newSaveData = JSON.parse(res.data[0].cards)
-
-              // if save data is same length, means we prolly already finished all in a previous round, 
-              // so begin with empty array
-              if (newSaveData.length === props.cards.length) {
-                newSaveData = []
-              }
-
-              setSaveData(newSaveData)
-              setCards(props.cards.map(function(card, index) {
-                    if (!newSaveData.includes(card.key)){
-                        return card
-                    }
-                }).filter(function(element) {
-                    return element !== undefined
-                }))
-            }
-            catch(err) {
-              console.log(err)
-            }
-          };
-        fetchData()
-    }, [props.user_id, props.flashset_id])
-
+    const {currentUser} = useContext(AuthContext)
 
     const [menuState, setMenuState] = useState(true) 
 
@@ -69,13 +38,56 @@ const Memorize = (props, ref) => {
         },
     }));
 
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!currentUser.id) {
+                startRef.current.style.display = "none"
+                return
+            }
+
+            try {
+              const res = await axios.get(`http://localhost:8800/api/progress/getFlashProgress`, {
+                params: {
+                    user_id: currentUser.id,
+                    flashset_id: props.flashset_id
+                }
+              })
+
+              let newSaveData = []
+              if (res.data.length !== 0) {
+                newSaveData = JSON.parse(res.data[0].cards)
+
+                // if save data is same length, means we prolly already finished all in a previous round, 
+                // so begin with empty array
+                if (newSaveData.length === props.cards.length) {
+                    newSaveData = []
+                }
+
+                setSaveData(newSaveData)
+              }
+              
+              setCards(props.cards.map(function(card, index) {
+                    if (!newSaveData.includes(card.key)){
+                        return card
+                    }
+                }).filter(function(element) {
+                    return element !== undefined
+                }))
+            }
+            catch(err) {
+              console.log(err)
+            }
+          };
+        fetchData()
+    }, [currentUser, props.flashset_id, startRef])
+
+
     const CorrectFunction = (event) => {
         event.preventDefault()
 
         if (menuState || !flipped) {return}
 
         setFlipped(false)
-        console.log("correct function called")
 
         // writes to save data that we got this card correct
         if (!saveData.includes(cards[props.currentCard].key)) {
@@ -155,7 +167,7 @@ const Memorize = (props, ref) => {
         return () => {
             document.removeEventListener("keydown", buttonDown, false);
         };
-    }, [props.functions, menuState, props.currentCard, cards, CorrectFunction, FlipFunction])
+    }, [props.functions, menuState, props.currentCard, cards])
 
     function disableMenu() {
         startRef.current.style.display = "none"
@@ -177,7 +189,12 @@ const Memorize = (props, ref) => {
     }
 
     return(
-        <div className="cardViewer">
+        <div className="cardViewer" style={{marginBottom: "30px"}}>
+            {!currentUser.id ? (
+                <div className="startScreen">
+                    <h3>Log in <a href="/login">here</a> to access this feature!</h3>
+                </div>
+            ) : null}
             <div className="startScreen" ref={startRef}>
                 <p>Cram everything you need to know in one sitting!</p>
                 <p>You have <b>{cards.length}</b> of <b>{props.cards.length}</b> cards remaining</p>

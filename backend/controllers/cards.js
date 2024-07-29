@@ -2,9 +2,21 @@ import {db} from "../db.js"
 import { v4 as uuidv4 } from 'uuid';
 
 export const getFlashSet = (req, res) => {
-    const q = "SELECT * from flashsets WHERE id = ?"
+    const q = "SELECT ?? FROM flashsets f INNER JOIN users u ON u.id = f.user_id WHERE f.id = ?"
 
-    db.query(q, [req.params.id], (err, data) => {
+    const columns = [
+        "f.id",
+        "f.user_id",
+        "name",
+        "subject",
+        "length",
+        "likes",
+        "bookmarks",
+        "username",
+        "flashcards"
+    ]
+
+    db.query(q, [columns, req.params.id], (err, data) => {
         if (err) return res.status(502).json(err)
         
         return res.status(200).json(data)
@@ -82,6 +94,36 @@ export const createFlashSet = (req, res) => {
         if (err) return res.json(err);
         console.log(data)
         return res.status(200).json({id: data.insertId})
+    })
+}
+
+export const getUserSets = (req, res) => {
+    const q = "SELECT ?? from flashsets WHERE user_id = ?"
+    const columns = [
+        'id',
+        'name', 
+        'likes',
+        'bookmarks',
+        'length',
+        'subject',
+        'public',
+        'description'
+    ]
+
+    db.query(q, [columns, req.params.user_id], (err, data) => {
+        if (err) return res.status(502).json(err)
+        
+        return res.status(200).json(data)
+    })
+}
+
+export const getBookmarkCount = (req, res) => {
+    const q = "SELECT COUNT(*) FROM bookmarks WHERE flashset_id = ?"
+
+    db.query(q, [req.params.id], (err, data) => {
+        if (err) return res.status(502).json(err)
+        
+        return res.status(200).json(data)
     })
 }
 
